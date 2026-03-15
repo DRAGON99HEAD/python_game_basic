@@ -21,18 +21,19 @@ class jogador:
         self.level = 1
         self.xp = 0
         self.max_xp = 100
+        self.points = 0
 
     def status(self):
 
         clear()
 
-        print("\n================ STATUS DO JOGADOR ================")
-        print(f"Nome: {self.nome}\t\t\tVida: {self.atual_life}/{self.max_life}")
+        print("\n==================== STATUS DO JOGADOR ====================")
+        print(f"Nome: {self.nome}\t\tVida: {self.atual_life}/{self.max_life}")
         print(f"Mana: {self.mana}\t\t\tInteligência: {self.inteligencia}")
         print(f"Speed: {self.speed}\t\t\tDefesa: {self.defesa}")
         print(f"Nível Atual: {self.level}\t\t\tXP: {self.xp}/{self.max_xp}")
-        print(f"Dano Base {self.dano_base}\t\t")
-        print("===================================================\n")
+        print(f"Dano Base {self.dano_base}\t\t\tPontos de Habilidade: {self.points}")
+        print("===========================================================\n")
 
         input("Pressione ENTER para continuar ...")
 
@@ -40,16 +41,7 @@ class jogador:
 bow_d = 10
 broken = 0
 dp = 0
-
-
-clear()
-
-print("===========================================\n\tJOGO BÁSICO DE RPG EM PYTHON\n===========================================\n")
-
-nome_personagem = input(f"Insira o nome do seu personagem: ")
-player = jogador(nome_personagem)
-
-playing = True
+xp_earned = 0
 
 def bolsa():
 
@@ -151,11 +143,8 @@ def attacks():
     clear()
     crit = 0
 
-    
-     
-
+    go_to = 0
     r_crit = random.randint(0,100)
-
     if r_crit <= 10 or r_crit >= 90:
            
 
@@ -171,22 +160,22 @@ def attacks():
             if crit == 1:
 
                 damage = max(10 * player.level,int(2 * (player.dano_base * player.speed) - (enemy.defense / 2)))
-                enemy.life = enemy.life - damage
+                enemy.life -= damage
 
                 print(f"Dano crítico!!!\nVocê deu {damage} de dano no inimigo")
                 input("Pressione ENTER para continuar ...")
 
-                enemy_attacks()
+                go_to = 1
 
             else:
 
                 damage = max(5 * player.level,int((player.dano_base * player.speed) - (enemy.defense / 2)))
-                enemy.life = enemy.life - damage
+                enemy.life -= damage
 
                 print(f"Você deu {damage} de dano no inimigo")
                 input("Pressione ENTER para continuar ...")
 
-                enemy_attacks()
+                go_to = 1
 
         case 2:
 
@@ -194,13 +183,13 @@ def attacks():
             if crit == 1 and player.mana >= 5:
 
                 damage = max(30 * player.level, int(2 * (player.dano_base * player.speed) * player.inteligencia - (enemy.defense / 2)))
-                enemy.life = enemy.life - damage
+                enemy.life -= damage
                 player.mana -= 5
 
                 print(f"Dano crítico!!!\nVocê deu {damage} de dano no inimigo")
                 input("Pressione ENTER para continuar ...")
 
-                enemy_attacks()
+                go_to = 1
 
             elif player.mana >= 5:
 
@@ -211,7 +200,7 @@ def attacks():
                 print(f"Você deu {damage} de dano no inimigo")
                 input("Pressione ENTER para continuar ...")
 
-                enemy_attacks()
+                go_to = 1
 
             else:
 
@@ -230,7 +219,7 @@ def attacks():
                 print(f"Dano crítico!!!\nVocê deu {damage} de dano no inimigo")
                 input("Pressione ENTER para continuar ...")
 
-                enemy_attacks()
+                go_to = 1
 
             elif player.mana >= 10:
 
@@ -241,7 +230,7 @@ def attacks():
                 print(f"Você deu {damage} de dano no inimigo")
                 input("Pressione ENTER para continuar ...")
 
-                enemy_attacks()
+                go_to = 1
 
             else:
 
@@ -260,7 +249,7 @@ def attacks():
                 print(f"Dano crítico!!!\nVocê deu {damage} de dano no inimigo")
                 input("Pressione ENTER para continuar ...")
 
-                enemy_attacks()
+                go_to = 1
 
             elif player.mana >= 20:
 
@@ -271,7 +260,7 @@ def attacks():
                 print(f"Você deu {damage} de dano no inimigo")
                 input("Pressione ENTER para continuar ...")
 
-                enemy_attacks()
+                go_to = 1
 
             else:
 
@@ -290,12 +279,13 @@ def attacks():
             if player.mana >= 40:
 
                 damage = max(250 * player.level, int(player.level * ( (10 * player.inteligencia) * (wave_meters * player.mana)) - (enemy.defense / 10)))
+                enemy.life -= damage
                 player.mana -= 40
 
                 print(f"Você deu {damage} de dano no inimigo")
                 input("Pressione ENTER para continuar ...")
 
-                enemy_attacks()
+                go_to = 1
 
             else:
 
@@ -334,7 +324,7 @@ def attacks():
                 print(f"Dano crítico!!!\nVocê deu {damage} de dano no inimigo")
                 input("Pressione ENTER para continuar ...")
 
-                enemy_attacks()
+                go_to = 1
 
             elif player.mana >= 15:
 
@@ -344,11 +334,16 @@ def attacks():
                 print(f"Você deu {damage} de dano no inimigo")
                 input("Pressione ENTER para continuar ...")
 
-                enemy_attacks()
+                go_to = 1
 
             else:
                 print("Você não possui mana suficiente para usar este ataque")
                 input("Pressione ENTER para continuar ...")
+
+
+    if enemy.life > 0 and go_to == 1:
+
+        enemy_attacks()
 
 
 
@@ -453,6 +448,8 @@ def defense():
 class inimigo():
 
     def __init__(self):
+
+        global xp_earned
         
         r_type = random.randint(0,100)
 
@@ -510,7 +507,15 @@ class inimigo():
             self.defense = int((S_acid * S_density) / S_size)
             self.force = int(S_acid * S_density)
             self.intel = 0
-    
+
+        if self.intel > 0:
+
+            xp_earned = int((self.defense / 4) + (self.force / 4) + (self.life / 4) + (self.intel / 4))
+
+        elif self.intel == 0:
+
+            xp_earned = int((self.defense / 4) + (self.force / 4) + (self.life / 4))
+
 
 
 def enemy_attacks():
@@ -518,6 +523,7 @@ def enemy_attacks():
     global bow_d, broken, dp
 
     clear()
+
 
     if bow_d <= 0 and dp == 0:
 
@@ -688,90 +694,132 @@ slime_kills = 0
 skeleton_kills = 0
 dragon_kills = 0
 goblin_kills = 0
+ini_run = True
+    
+while ini_run == True:
+
+
+    clear()
+
+    print("===========================================\n\tJOGO BÁSICO DE RPG EM PYTHON\n===========================================\n")
+
+    nome_personagem = input(f"Insira o nome do seu personagem: ")
+    player = jogador(nome_personagem)
+
+    playing = True
+
+    while player.atual_life > 0 and playing == True:
+
+        round = 0
+        enemy = inimigo()
+
+        while player.atual_life > 0 and enemy.life > 0 and playing == True:
+
+            clear()
+        
+            print(f"==================================================================\n\n\tJOGADOR: {player.nome}\tVIDA: {player.atual_life}/{player.max_life}\tMANA: {player.mana}")
+            print(f"\n\n\tINIMIGO: {enemy.name}\t\tVIDA: {enemy.life}\n\n======================== ESCOLHA UMA AÇÃO ========================")
+            option = int(input("\t1 - Ataques\t\t\t2 - Defesa\n\t3 - Bolsa\t\t\t4 - Status\n\n\t\t\t\t\t0 - Sair\n\n: "))
+
+            match option:
+
+                case 1:
+
+                    attacks()
+
+                case 2:
+
+                    defense()
+
+                case 3:
+
+                    bolsa()
+
+                case 4:
+
+                    player.status()
+
+                case 0:
+
+                    playing = False
+
+        if enemy.life <= 0:
+
+            player.xp += xp_earned
+
+            clear()
+            print(f"Você recebeu {xp_earned} de xp ao matar o inimigo")
+            input("Pressione ENTER para continuar ...")
+
+            level_before = player.level
+
+            while player.xp >= player.max_xp:
+
+                player.level += 1
+                player.xp -= player.max_xp
+                player.max_xp += 20
+                player.points += 3
+
+                player.max_life += 10
+                player.mana += 20
+
+            print(f"Você upou {player.level - level_before} {'nível' if player.level - level_before == 1 else 'níveis'}")
+            input("Pressione ENTER para continuar ...")
+
+            if enemy.name == "SLIME":
+
+                slime_kills += 1
+
+                clear()
+                print("=================================================")
+                print(f"Você matou o inimigo {enemy.name} totalizando um total de {slime_kills} {'assassinato' if slime_kills == 1 else 'assassinatos'}")
+                print("=================================================")
+
+                input("Pressione ENTER para continuar ...")
+
+            elif enemy.name == "GOBLIN":
+
+                goblin_kills += 1
+
+                clear()
+                print("=================================================")
+                print(f"Você matou o inimigo {enemy.name} totalizando um total de {goblin_kills} {'assassinato' if goblin_kills == 1 else 'assassinatos'}")
+                print("=================================================")
+
+                input("Pressione ENTER para continuar")
+
+            elif enemy.name == "DRAGÃO":
+
+                dragon_kills += 1
+
+                clear()
+                print("=================================================")
+                print(f"Você matou o inimigo {enemy.name} totalizando um total de {dragon_kills} {'assassinato' if dragon_kills == 1 else 'assassinatos'}")
+                print("=================================================")
+
+                input("Pressione ENTER para continuar ...")
+
+            elif enemy.name == "ESQUELETO":
+
+                skeleton_kills += 1
+                dp = 0
+                bow_d = 10
+
+                clear()
+                print("=================================================")
+                print(f"Você matou o inimigo {enemy.name} totalizando um total de {skeleton_kills} {'assassinato' if skeleton_kills == 1 else 'assassinatos'}")
+                print("=================================================")
+
+                input("Pressione ENTER para continuar ...")
 
     
-
-while player.atual_life > 0 and playing == True:
-
-    round = 0
-    enemy = inimigo()
-
-    while player.atual_life > 0 and enemy.life > 0 and playing == True:
-
-        clear()
+    if player.atual_life <= 0:
         
-        print(f"==================================================================\n\n\tJOGADOR: {player.nome}\tVIDA: {player.atual_life}/{player.max_life}\tMANA: {player.mana}")
-        print(f"\n\n\tINIMIGO: {enemy.name}\t\tVIDA: {enemy.life}\n\n======================== ESCOLHA UMA AÇÃO ========================")
-        option = int(input("\t1 - Ataques\t\t\t2 - Defesa\n\t3 - Bolsa\t\t\t4 - Status\n\n\t\t\t\t\t0 - Sair\n\n: "))
+        clear()
+        A = int(input("Você morreu!!!\n1 - Sim\n2 - Não\nDeseja jogar novamente?\n:"))
 
-        match option:
-
-            case 1:
-
-                attacks()
+        match A:
 
             case 2:
 
-                defense()
-
-            case 3:
-
-                bolsa()
-
-            case 4:
-
-                player.status()
-
-            case 0:
-
-                playing = False
-
-    if enemy.life <= 0:
-
-        if enemy.name == "SLIME":
-
-            slime_kills += 1
-
-            clear()
-            print("=================================================")
-            print(f"Você matou o inimigo {enemy.name} totalizando um total de {slime_kills} {'assassinato' if slime_kills == 1 else 'assassinatos'}")
-            print("=================================================")
-
-            input("Pressione ENTER para continuar ...")
-
-        elif enemy.name == "GOBLIN":
-
-            goblin_kills += 1
-
-            clear()
-            print("=================================================")
-            print(f"Você matou o inimigo {enemy.name} totalizando um total de {goblin_kills} {'assassinato' if goblin_kills == 1 else 'assassinatos'}")
-            print("=================================================")
-
-            input("Pressione ENTER para continuar")
-
-        elif enemy.name == "DRAGÃO":
-
-            dragon_kills += 1
-
-            clear()
-            print("=================================================")
-            print(f"Você matou o inimigo {enemy.name} totalizando um total de {dragon_kills} {'assassinato' if dragon_kills == 1 else 'assassinatos'}")
-            print("=================================================")
-
-            input("Pressione ENTER para continuar ...")
-
-        elif enemy.name == "ESQUELETO":
-
-            skeleton_kills += 1
-            dp = 0
-            bow_d = 10
-
-            clear()
-            print("=================================================")
-            print(f"Você matou o inimigo {enemy.name} totalizando um total de {skeleton_kills} {'assassinato' if skeleton_kills == 1 else 'assassinatos'}")
-            print("=================================================")
-
-            input("Pressione ENTER para continuar ...")
-
-        
+                ini_run = False
