@@ -35,7 +35,66 @@ class jogador:
         print(f"Dano Base {self.dano_base}\t\t\tPontos de Habilidade: {self.points}")
         print("===========================================================\n")
 
-        input("Pressione ENTER para continuar ...")
+        if player.points > 0:
+
+            print(f"Você possui {player.points} {'ponto' if player.points == 1 else 'pontos'} de habilidade para usar\n1 - Sim\n2 - Não")
+            use = int(input("Deseja usar esses pontos?\n: "))
+
+            match use:
+
+                case 1:
+
+                    status_upd()
+
+        else:
+
+            input("Pressione ENTER para continuar ...")
+
+
+def status_upd():
+
+    while player.points > 0:
+        upd = 0
+        clear()
+
+        print("===========================================================")
+        print(f"1 - Vida máxima\t\t{player.max_life}\n2 - Velocidade\t\t{player.speed}\n3 - Defesa Base\t\t{player.defesa_base}\n4 - Inteligência\t{player.inteligencia}\n5 - Dano Base\t\t{player.dano_base}\n\t\t\t\t\t0 - Voltar")
+        print("===========================================================")
+        upd = int(input(f"Você possui {player.points} {'ponto' if player.points == 1 else 'pontos'} de habilidade para usar\nEscolha um atributo para ser melhorado\n: "))
+
+        match upd:
+
+            case 0:
+
+                break
+
+            case 1:
+
+                player.max_life += 50
+                player.points -= 1
+
+            case 2:
+
+                player.speed += 2
+                player.points -= 1
+
+            case 3:
+
+                player.defesa_base += 3
+                player.points -= 1
+
+            case 4:
+
+                player.inteligencia += 2
+                player.points -= 1
+
+            case 5:
+
+                player.dano_base += 3
+                player.points -= 1
+
+
+
 
 
 bow_d = 10
@@ -710,15 +769,22 @@ while ini_run == True:
 
     while player.atual_life > 0 and playing == True:
 
-        round = 0
+        round = 1
         enemy = inimigo()
 
         while player.atual_life > 0 and enemy.life > 0 and playing == True:
+             
+
+            if player.defesa < player.defesa_base:
+
+                player.defesa = player.defesa_base
 
             clear()
+            counter = player.atual_life
+            counter1 = enemy.life
         
             print(f"==================================================================\n\n\tJOGADOR: {player.nome}\tVIDA: {player.atual_life}/{player.max_life}\tMANA: {player.mana}")
-            print(f"\n\n\tINIMIGO: {enemy.name}\t\tVIDA: {enemy.life}\n\n======================== ESCOLHA UMA AÇÃO ========================")
+            print(f"\n\tROUND: {round}\n\n\tINIMIGO: {enemy.name}\t\tVIDA: {enemy.life}\n\n======================== ESCOLHA UMA AÇÃO ========================")
             option = int(input("\t1 - Ataques\t\t\t2 - Defesa\n\t3 - Bolsa\t\t\t4 - Status\n\n\t\t\t\t\t0 - Sair\n\n: "))
 
             match option:
@@ -743,6 +809,10 @@ while ini_run == True:
 
                     playing = False
 
+            if counter != player.atual_life or counter1 != enemy.life:
+
+                round += 1
+
         if enemy.life <= 0:
 
             player.xp += xp_earned
@@ -750,6 +820,7 @@ while ini_run == True:
             clear()
             print(f"Você recebeu {xp_earned} de xp ao matar o inimigo")
             input("Pressione ENTER para continuar ...")
+            clear()
 
             level_before = player.level
 
@@ -811,6 +882,23 @@ while ini_run == True:
                 print("=================================================")
 
                 input("Pressione ENTER para continuar ...")
+
+            rest = 0
+            clear()
+
+            print("Você gostaria de descansar para recuperar vida e mana?")
+            rest = int(input("1 - Sim\n2 - Não\n: "))
+
+            match rest:
+
+                case 1:
+
+                    mana_regen = random.randint(20,250)
+                    player.mana += mana_regen
+                    player.atual_life = player.max_life
+
+                    print(f"Você descansou e recuperou sua vida por completo e sua mana foi recuperada em {mana_regen} pontos")
+                    input("Pressione ENTER pata continuar ...")
 
     
     if player.atual_life <= 0:
