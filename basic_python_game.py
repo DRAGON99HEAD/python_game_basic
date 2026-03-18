@@ -1,6 +1,7 @@
 import os
 import random
 import readchar
+import json
 
 counter = False
 slime_kills = 0
@@ -305,7 +306,7 @@ def defense():
     clear()
 
     print("========================== DEFESA ==========================")
-    print("1 - Defesa dupla\n2 - Cura\n3 - Parry\n4 - Contra-ataque\n\n\t\t\t\t\t\t0 - Voltar\n============================================================")
+    print("1 - Defesa dupla\n2 - Cura\n3 - Parry\n\n\t\t\t\t\t\t0 - Voltar\n============================================================")
     print(": ", end="", flush=True)
 
     defe = readchar.readkey()
@@ -592,17 +593,135 @@ def enemy_attacks():
                 counter = True
                 print(f"O esqueleto usou SCRATCH causando {damage - block} de dano ao jogador {player.nome}")
                 input("Pressione ENTER para continuar ...")
+
+
+def load():
+    global slime_kills, skeleton_kills, dragon_kills, goblin_kills, player
+
+    # Checa se o arquivo de save existe no computador
+    if os.path.exists("save_rpg.json"):
+        with open("save_rpg.json", "r") as arquivo:
+            dados_save = json.load(arquivo)
+
+        # Recria o jogador usando o nome salvo
+        player = jogador(dados_save["nome"])
+
+        # Devolve todos os atributos pro jogador
+        player.max_life = dados_save["max_life"]
+        player.atual_life = dados_save["atual_life"]
+        player.speed = dados_save["speed"]
+        player.mana = dados_save["mana"]
+        player.defesa_base = dados_save["defesa_base"]
+        player.defesa = dados_save["defesa"]
+        player.inteligencia = dados_save["inteligencia"]
+        player.dano_base = dados_save["dano_base"]
+        player.l_pocao = dados_save["l_pocao"]
+        player.m_pocao = dados_save["m_pocao"]
+        player.level = dados_save["level"]
+        player.xp = dados_save["xp"]
+        player.max_xp = dados_save["max_xp"]
+        player.points = dados_save["points"]
+        player.m_regen = dados_save["m_regen"]
+        player.l_regen = dados_save["l_regen"]
+
+        # Devolve os placares
+        slime_kills = dados_save["slime_kills"]
+        skeleton_kills = dados_save["skeleton_kills"]
+        dragon_kills = dados_save["dragon_kills"]
+        goblin_kills = dados_save["goblin_kills"]
+
+        print("========================================")
+        print("📂 JOGO CARREGADO COM SUCESSO!")
+        print("========================================")
+        input("Pressione ENTER para continuar...")
+        return True # Retorna Verdadeiro se deu certo
+    else:
+        print("Nenhum save encontrado!")
+        input("Pressione ENTER para continuar...")
+        return False # Retorna Falso se não tiver save
     
+
+
+def save():
+
+    clear()
+    
+    # Criamos um Dicionário com todos os dados importantes
+    dados_save = {
+        "nome": player.nome,
+        "max_life": player.max_life,
+        "atual_life": player.atual_life,
+        "speed": player.speed,
+        "mana": player.mana,
+        "defesa_base": player.defesa_base,
+        "defesa": player.defesa,
+        "inteligencia": player.inteligencia,
+        "dano_base": player.dano_base,
+        "l_pocao": player.l_pocao,
+        "m_pocao": player.m_pocao,
+        "level": player.level,
+        "xp": player.xp,
+        "max_xp": player.max_xp,
+        "points": player.points,
+        "m_regen": player.m_regen,
+        "l_regen": player.l_regen,
+        
+        # Salvamos também os placares globais!
+        "slime_kills": slime_kills,
+        "skeleton_kills": skeleton_kills,
+        "dragon_kills": dragon_kills,
+        "goblin_kills": goblin_kills
+    }
+
+    # Abre (ou cria) um arquivo e injeta os dados lá dentro
+    with open("save_rpg.json", "w") as arquivo:
+        json.dump(dados_save, arquivo, indent=4)
+
+    print("========================================")
+    print("💾 JOGO SALVO COM SUCESSO!")
+    print("========================================")
+    input("Pressione ENTER para continuar...")
+
+
+
 while ini_run == True:
 
     clear()
-    print("===========================================\n\tJOGO BÁSICO DE RPG EM PYTHON\n===========================================\n")
+    print("1 - Carregar jogo\n2 - Novo jogo")
+    ld = int(readchar.readkey())
 
-    nome_personagem = input(f"Insira o nome do seu personagem: ")
-    player = jogador(nome_personagem)
+    match ld:
+
+        case 1:
+
+            if os.path.exists("save_rpg.json"):
+
+                clear()
+                load()
+
+            else:
+
+                print("Nenhum jogo salvo encontrado")
+                input("Pressione ENTER para continuar ...")
+
+                clear()
+                print("===========================================\n\tJOGO BÁSICO DE RPG EM PYTHON\n===========================================\n")
+
+                nome_personagem = input(f"Insira o nome do seu personagem: ")
+                player = jogador(nome_personagem)
+
+        case 2:
+
+            clear()
+            print("===========================================\n\tJOGO BÁSICO DE RPG EM PYTHON\n===========================================\n")
+
+            nome_personagem = input(f"Insira o nome do seu personagem: ")
+            player = jogador(nome_personagem)
 
     playing = True
 
+
+    
     while player.atual_life > 0 and playing == True:
         round = 1
         enemy = inimigo()
@@ -743,3 +862,19 @@ while ini_run == True:
         match A:
             case "2":
                 ini_run = False
+
+    clear()
+    print("1 - Salvar e sair\n2 - Sair\n: ")
+    sv = int(readchar.readkey())
+    clear()
+
+    match sv:
+
+        case 1:
+
+            save()
+            ini_run = False
+
+        case 2:
+
+            ini_run = False
